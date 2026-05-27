@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Route 9906 — Payment Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1E7D5;
+    --paper-deep:#E9DBC2;
+    --card:#FBF5E9;
+    --card-2:#F6EEDD;
+    --ink:#2C2117;
+    --ink-soft:#6E5E48;
+    --ink-faint:#9C8B72;
+    --wheat:#C8961B;
+    --wheat-deep:#A2760C;
+    --crust:#714A23;
+    --sage:#5C7A4F;
+    --rust:#B14E2C;
+    --line:rgba(44,33,23,0.12);
+    --line-strong:rgba(44,33,23,0.22);
+    --shadow:0 1px 2px rgba(44,33,23,.06),0 8px 24px rgba(44,33,23,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Spline Sans',sans-serif;
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      radial-gradient(1200px 600px at 85% -10%, rgba(200,150,27,.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(113,74,35,.10), transparent 55%);
+    min-height:100vh;
+    line-height:1.5;
+    position:relative;
+  }
+  /* paper grain */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    mix-blend-mode:multiply;
+  }
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:28px 20px 72px}
+
+  /* ---------- Header ---------- */
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .mark{
+    width:46px;height:46px;border-radius:13px;flex:none;
+    background:linear-gradient(150deg,var(--wheat),var(--wheat-deep));
+    display:grid;place-items:center;box-shadow:var(--shadow);color:#fff;
+  }
+  .mark svg{width:26px;height:26px}
+  .brand h1{font-family:'Fraunces',serif;font-weight:600;font-size:1.45rem;letter-spacing:-.01em;line-height:1.05}
+  .brand .sub{font-size:.78rem;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase;font-weight:500;margin-top:2px}
+  .top-actions{display:flex;gap:9px;flex-wrap:wrap}
+
+  /* ---------- Buttons ---------- */
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:11px;font-size:.9rem;font-weight:500;transition:transform .12s ease,box-shadow .12s ease,background .15s ease,border-color .15s}
+  button:active{transform:translateY(1px)}
+  .btn-primary{background:linear-gradient(150deg,var(--wheat),var(--wheat-deep));color:#fff;padding:12px 20px;box-shadow:var(--shadow);font-weight:600}
+  .btn-primary:hover{box-shadow:0 3px 6px rgba(162,118,12,.25),0 10px 26px rgba(162,118,12,.28)}
+  .btn-ghost{background:var(--card);color:var(--ink);padding:11px 16px;border:1px solid var(--line-strong)}
+  .btn-ghost:hover{background:var(--card-2);border-color:var(--ink-faint)}
+  .btn-sm{padding:8px 13px;font-size:.82rem;border-radius:9px}
+  .icon-btn{background:var(--card);border:1px solid var(--line-strong);width:42px;height:42px;border-radius:11px;display:grid;place-items:center;color:var(--ink-soft)}
+  .icon-btn:hover{background:var(--card-2);color:var(--ink)}
+  .icon-btn svg{width:19px;height:19px}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:linear-gradient(160deg,#3A2A19,#2C2117);color:#F4E9D6;
+    border-radius:22px;padding:30px 32px;box-shadow:var(--shadow);
+    display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;margin-bottom:18px;
+    position:relative;overflow:hidden;
+  }
+  .hero::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(200,150,27,.22),transparent 70%)}
+  .hero .label{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:#C8B79C;font-weight:500;margin-bottom:8px}
+  .hero .balance{font-family:'Spline Sans Mono',monospace;font-size:3.0rem;font-weight:600;letter-spacing:-.02em;line-height:1}
+  .hero .balance .cents{font-size:1.6rem;color:#C8B79C}
+  .hero .sub-line{margin-top:12px;color:#C8B79C;font-size:.92rem}
+  .hero .sub-line b{color:#F4E9D6;font-weight:600}
+  .ring-wrap{position:relative;width:132px;height:132px;flex:none}
+  .ring-wrap .pct{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+  .ring-wrap .pct .n{font-family:'Spline Sans Mono',monospace;font-size:1.55rem;font-weight:600;line-height:1}
+  .ring-wrap .pct .t{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:#C8B79C;margin-top:3px}
+
+  .status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+  .pill{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;font-size:.82rem;font-weight:500;background:var(--card);border:1px solid var(--line-strong)}
+  .pill .dot{width:8px;height:8px;border-radius:50%}
+  .pill.ok .dot{background:var(--sage)} .pill.ok{color:var(--sage)}
+  .pill.behind .dot{background:var(--rust)} .pill.behind{color:var(--rust)}
+  .pill.ahead .dot{background:var(--wheat-deep)} .pill.ahead{color:var(--wheat-deep)}
+
+  /* ---------- Stat grid ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:13px;margin-bottom:26px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px 18px;box-shadow:var(--shadow)}
+  .stat .k{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);font-weight:500}
+  .stat .v{font-family:'Spline Sans Mono',monospace;font-size:1.42rem;font-weight:600;margin-top:7px;letter-spacing:-.01em}
+  .stat .v.sm{font-size:1.12rem}
+  .stat .note{font-size:.76rem;color:var(--ink-faint);margin-top:3px}
+
+  /* ---------- Section ---------- */
+  .section{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)}
+  .section-head h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;letter-spacing:-.01em}
+  .section-head .hint{font-size:.78rem;color:var(--ink-faint)}
+  .section-body{padding:6px 22px 22px}
+
+  /* ---------- Chart ---------- */
+  .chart-box{padding:18px 14px 8px}
+  svg.chart{width:100%;height:auto;display:block;overflow:visible}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;padding:4px 8px 14px;font-size:.8rem;color:var(--ink-soft)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
+
+  /* ---------- Table ---------- */
+  .table-scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:540px}
+  th{text-align:right;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;padding:11px 12px;border-bottom:1px solid var(--line-strong)}
+  th:first-child,td:first-child{text-align:left}
+  td{padding:12px;border-bottom:1px solid var(--line);text-align:right;font-family:'Spline Sans Mono',monospace;font-variant-numeric:tabular-nums}
+  td.txt{font-family:'Spline Sans',sans-serif}
+  tr:last-child td{border-bottom:none}
+  tr.row:hover{background:var(--card-2)}
+  .del{background:transparent;color:var(--ink-faint);width:28px;height:28px;border-radius:7px;display:inline-grid;place-items:center}
+  .del:hover{background:rgba(177,78,44,.12);color:var(--rust)}
+  .del svg{width:15px;height:15px}
+  .empty{text-align:center;color:var(--ink-faint);padding:34px 12px;font-size:.92rem}
+
+  /* ---------- Form / settings ---------- */
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);font-weight:500}
+  .field input{font-family:'Spline Sans Mono',monospace;font-size:.95rem;color:var(--ink);background:var(--paper);border:1px solid var(--line-strong);border-radius:10px;padding:11px 12px;width:100%}
+  .field input:focus{outline:none;border-color:var(--wheat);box-shadow:0 0 0 3px rgba(200,150,27,.18)}
+  .hide{display:none!important}
+
+  .logbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:18px 22px;background:var(--card-2);border-bottom:1px solid var(--line)}
+  .logbar .field{flex:1;min-width:120px}
+  .assume{font-size:.8rem;color:var(--ink-soft);background:rgba(200,150,27,.10);border:1px solid rgba(200,150,27,.3);border-radius:12px;padding:13px 16px;margin-bottom:18px;line-height:1.55}
+  .assume b{color:var(--crust)}
+
+  footer{text-align:center;color:var(--ink-faint);font-size:.8rem;margin-top:30px;line-height:1.7}
+  footer a{color:var(--wheat-deep)}
+
+  /* ---- cloud / auth ---- */
+  #authGate{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#2C2117,#3A2A19);display:grid;place-items:center;padding:24px;text-align:center}
+  #authGate .box{max-width:370px;color:#F4E9D6}
+  #authGate .gmark{width:62px;height:62px;border-radius:17px;margin:0 auto 20px;background:linear-gradient(150deg,var(--wheat),var(--wheat-deep));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow)}
+  #authGate .gmark svg{width:34px;height:34px}
+  #authGate h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.55rem;margin-bottom:9px;letter-spacing:-.01em}
+  #authGate p{color:#C8B79C;font-size:.93rem;margin-bottom:24px;line-height:1.6}
+  #signInBtn{background:#fff;color:#2C2117;padding:13px 22px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:11px;font-size:.96rem;box-shadow:var(--shadow)}
+  #signInBtn svg{width:19px;height:19px}
+  #authMsg{margin-top:18px;color:#E6A892;font-size:.84rem;min-height:1.1em;line-height:1.5}
+  .authchip{display:inline-flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line-strong);border-radius:11px;padding:6px 7px 6px 13px;font-size:.8rem;color:var(--ink-soft);max-width:62vw}
+  .authchip b{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:34vw}
+  .authchip .role{flex:none;background:var(--sage);color:#fff;font-size:.64rem;letter-spacing:.04em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:7px}
+  .authchip .role.viewer{background:var(--crust)}
+  .authchip button{flex:none;background:transparent;color:var(--ink-faint);font-size:.76rem;padding:5px 8px;border-radius:7px;border:1px solid transparent}
+  .authchip button:hover{background:var(--card-2);color:var(--rust)}
+  #viewerBadge{background:rgba(92,122,79,.14);color:var(--sage);border:1px solid rgba(92,122,79,.4)}
+  #cloudBanner{background:rgba(110,94,72,.1);border:1px solid var(--line-strong);color:var(--ink-soft);border-radius:13px;padding:11px 16px;font-size:.82rem;margin-bottom:18px;line-height:1.5}
+  #cloudBanner b{color:var(--crust)}
+
+  @media (max-width:620px){
+    .hero{grid-template-columns:1fr;text-align:center;padding:26px 22px}
+    .ring-wrap{margin:0 auto}
+    .hero .balance{font-size:2.5rem}
+    .brand h1{font-size:1.25rem}
+    .authchip{max-width:100%}
+  }
+</style>
+<!-- Firebase SDK (only used when cloud sync is configured below) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 13c0-3 2.5-5 8-5s8 2 8 5c0 1.5-1 2.5-2.5 2.5-1 0-1.5-.6-2.2-.6-.7 0-1.2.6-2.3.6s-1.6-.6-2.3-.6-1.2.6-2.2.6C6 15.5 4 14.5 4 13Z"/>
+          <path d="M8 11.5v3M12 11v3.5M16 11.5v3"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Route 9906 Ledger</h1>
+        <div class="sub">Seller-Financed Payment Tracker</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="authchip hide" id="authChip">
+        <b id="chipEmail"></b>
+        <span class="role" id="chipRole">Editor</span>
+        <button id="signOutBtn">Sign out</button>
+      </div>
+      <button class="icon-btn" id="settingsBtn" title="Loan settings" aria-label="Loan settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="cloudBanner" class="hide"><b>Running locally.</b> Cloud sync isn’t set up yet — add your Firebase keys in the code to share this with the lender. Until then, data stays on this device only.</div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <div class="label">Remaining Balance</div>
+      <div class="balance" id="heroBalance">$0</div>
+      <div class="sub-line" id="heroSub">—</div>
+    </div>
+    <div class="ring-wrap">
+      <svg viewBox="0 0 120 120" width="132" height="132">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="11"/>
+        <circle id="ring" cx="60" cy="60" r="52" fill="none" stroke="url(#g)" stroke-width="11" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E0B33A"/><stop offset="1" stop-color="#C8961B"/></linearGradient></defs>
+      </svg>
+      <div class="pct"><div><div class="n" id="ringPct">0%</div><div class="t">Paid Off</div></div></div>
+    </div>
+  </div>
+
+  <div class="status-row">
+    <button class="btn-primary" id="logWeekBtn">+ Log this week's $350</button>
+    <button class="btn-ghost btn-sm" id="customBtn">Custom payment</button>
+    <span class="pill hide" id="viewerBadge"><span class="dot" style="background:var(--sage)"></span>View only — the owner logs payments</span>
+    <span class="pill" id="trackPill"><span class="dot"></span><span id="trackTxt">—</span></span>
+  </div>
+
+  <!-- LOG FORM (hidden until used) -->
+  <div class="section hide" id="logSection">
+    <div class="logbar">
+      <div class="field"><label>Date</label><input type="date" id="payDate"></div>
+      <div class="field"><label>Amount ($)</label><input type="number" id="payAmt" step="0.01" value="350"></div>
+      <div class="field" style="flex:2"><label>Note (optional)</label><input type="text" id="payNote" placeholder="e.g. week 1, paid by Zelle"></div>
+      <button class="btn-primary" id="savePayBtn">Save payment</button>
+      <button class="btn-ghost btn-sm" id="cancelPayBtn">Cancel</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="grid" id="statGrid"></div>
+
+  <!-- CHART -->
+  <div class="section">
+    <div class="section-head"><h2>Payoff trajectory</h2><span class="hint">projected vs. actual balance</span></div>
+    <div class="chart-box">
+      <div class="legend">
+        <span><i style="background:#C8961B"></i> Projected ($350/wk)</span>
+        <span><i style="background:#5C7A4F"></i> Your actual payments</span>
+      </div>
+      <svg class="chart" id="chart" viewBox="0 0 720 260" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="section">
+    <div class="section-head">
+      <h2>Payment history</h2>
+      <span class="hint" id="histCount">0 payments</span>
+    </div>
+    <div class="table-scroll">
+      <table id="histTable">
+        <thead><tr><th>Date</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Balance</th><th></th></tr></thead>
+        <tbody id="histBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="section hide" id="settingsSection">
+    <div class="section-head"><h2>Loan settings</h2><span class="hint">edit & save</span></div>
+    <div class="section-body">
+      <div class="assume" id="assumeNote"></div>
+      <div class="form-grid">
+        <div class="field"><label>Amount financed ($)</label><input type="number" id="cfgLoan" step="100"></div>
+        <div class="field"><label>Interest rate (% / yr)</label><input type="number" id="cfgRate" step="0.05"></div>
+        <div class="field"><label>Weekly payment ($)</label><input type="number" id="cfgPay" step="5"></div>
+        <div class="field"><label>Down payment ($, paid)</label><input type="number" id="cfgDown" step="100"></div>
+        <div class="field"><label>Start date</label><input type="date" id="cfgStart"></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+        <button class="btn-primary" id="saveCfgBtn">Save settings</button>
+        <button class="btn-ghost btn-sm" id="exportBtn">⬇ Backup to file</button>
+        <button class="btn-ghost btn-sm" id="importBtn">⬆ Restore from file</button>
+        <button class="btn-ghost btn-sm" id="resetBtn" style="color:var(--rust)">Reset everything</button>
+        <input type="file" id="importFile" accept="application/json,.json" class="hide">
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span id="footNote">Data is saved privately in this browser only — nothing is uploaded.</span><br>
+    Interest accrues weekly on the declining balance (annual rate ÷ 52).
+  </footer>
+
+</div>
+
+<!-- Sign-in gate (cloud mode only) -->
+<div id="authGate" class="hide">
+  <div class="box">
+    <div class="gmark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 13c0-3 2.5-5 8-5s8 2 8 5c0 1.5-1 2.5-2.5 2.5-1 0-1.5-.6-2.2-.6-.7 0-1.2.6-2.3.6s-1.6-.6-2.3-.6-1.2.6-2.2.6C6 15.5 4 14.5 4 13Z"/><path d="M8 11.5v3M12 11v3.5M16 11.5v3"/>
+      </svg>
+    </div>
+    <h2>Route 9906 Ledger</h2>
+    <p>Sign in with the Google account that was given access to this loan ledger.</p>
+    <button id="signInBtn">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>
+      Sign in with Google
+    </button>
+    <div id="authMsg"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CLOUD SYNC SETUP — edit these 4 things, then save & push.
+   (Leave them as-is to keep running locally on one device.)
+   Full step-by-step is in SETUP.md.
+   ============================================================ */
+const firebaseConfig = {
+  apiKey:            "AIzaSyDudbI7MRSr0IEsDVBcxToNKq1cZqWFGrA",
+  authDomain:        "route-9906-ledger.firebaseapp.com",
+  projectId:         "route-9906-ledger",
+  storageBucket:     "route-9906-ledger.firebasestorage.app",
+  messagingSenderId: "113433662543",
+  appId:             "1:113433662543:web:4892c2cfc2626118b3c63a"
+};
+const LEDGER_ID     = "route9906";                 // any name; both people must use the same one
+const EDITOR_EMAIL  = "startekfl@gmail.com";       // YOUR Google account — can log payments
+const VIEWER_EMAILS = ["davidjr1223@gmail.com"];   // lender's Google account(s) — view only
+/* ============================================================ */
+
+/* ---------- storage (localStorage with in-memory fallback) ---------- */
+const Store = {
+  mem:{},
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return this.mem[k] ?? null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ this.mem[k]=v; } }
+};
+const CFG_KEY='r9906_cfg', PAY_KEY='r9906_pays', CFG_VERSION=2;
+
+const DEFAULT_CFG = { loan:108000, rate:5, weekly:350, down:17000, start: todayISO() };
+
+function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function loadCfg(){
+  try{
+    const saved=JSON.parse(Store.get(CFG_KEY));
+    if(saved && saved._v===CFG_VERSION) return Object.assign({}, DEFAULT_CFG, saved);
+  }catch(e){}
+  return {...DEFAULT_CFG};   // ignore older/stale saved settings, keep payment history
+}
+function loadPays(){ try{ return JSON.parse(Store.get(PAY_KEY))||[]; }catch(e){ return []; } }
+function saveCfg(c){ Store.set(CFG_KEY, JSON.stringify({...c, _v:CFG_VERSION})); }
+function savePays(p){ Store.set(PAY_KEY, JSON.stringify(p)); }
+
+let cfg = loadCfg();
+let pays = loadPays();
+
+/* ---------- helpers ---------- */
+const fmt = n => '$'+Math.round(n).toLocaleString('en-US');
+function fmtC(n){ // dollars with split cents for hero
+  const v=Math.max(0,n); const whole=Math.floor(v); const cents=Math.round((v-whole)*100).toString().padStart(2,'0');
+  return {whole:'$'+whole.toLocaleString('en-US'), cents};
+}
+const fmt2 = n => '$'+(Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function addDays(iso,d){ const x=new Date(iso+'T00:00:00'); x.setDate(x.getDate()+d); return x; }
+function fmtDate(d){ return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function weeksBetween(aIso,bIso){ return Math.floor((new Date(bIso+'T00:00:00') - new Date(aIso+'T00:00:00'))/(7*864e5)); }
+
+/* ---------- core math ---------- */
+// Build the actual ledger from logged payments. Each payment = one weekly interest period.
+function buildLedger(){
+  const wr = cfg.rate/100/52;
+  let bal = cfg.loan, intTot=0, prinTot=0, paidTot=0;
+  const sorted = [...pays].sort((a,b)=> a.date.localeCompare(b.date) || a.id-b.id);
+  const rows = sorted.map(p=>{
+    const interest = bal*wr;
+    let principal = p.amount - interest;
+    if(principal > bal) principal = bal;            // don't overpay principal
+    bal = Math.max(0, bal - principal);
+    intTot+=interest; prinTot+=principal; paidTot+=p.amount;
+    return {...p, interest, principal, balance:bal};
+  });
+  return {rows, balance:bal, intTot, prinTot, paidTot, count:sorted.length};
+}
+
+// Project remaining schedule from a starting balance at $weekly/wk.
+function project(fromBal){
+  const wr = cfg.rate/100/52, pay=cfg.weekly;
+  let bal=fromBal, weeks=0, interest=0; const pts=[];
+  if(pay <= bal*wr) return {weeks:Infinity, interest:Infinity, pts:[]}; // never pays off
+  while(bal>0.005 && weeks<5000){
+    const i=bal*wr; let pr=pay-i; if(pr>bal)pr=bal; bal-=pr; interest+=i; weeks++;
+    pts.push(bal);
+  }
+  return {weeks, interest, pts};
+}
+
+// Full projected curve from origin (for the chart baseline)
+function fullProjection(){
+  const wr=cfg.rate/100/52, pay=cfg.weekly; let bal=cfg.loan; const pts=[bal];
+  if(pay<=bal*wr) return pts;
+  let w=0;
+  while(bal>0.005 && w<5000){ const i=bal*wr; let pr=pay-i; if(pr>bal)pr=bal; bal-=pr; pts.push(Math.max(0,bal)); w++; }
+  return pts;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const L = buildLedger();
+  const proj = project(L.balance);
+  const fmtH = fmtC(L.balance);
+
+  // hero
+  document.getElementById('heroBalance').innerHTML = fmtH.whole+'<span class="cents">.'+fmtH.cents+'</span>';
+  const pctPaid = cfg.loan>0 ? Math.min(100, (L.prinTot/cfg.loan)*100) : 0;
+  document.getElementById('ringPct').textContent = pctPaid.toFixed(pctPaid<10?1:0)+'%';
+  const circ=2*Math.PI*52;
+  document.getElementById('ring').setAttribute('stroke-dashoffset', circ*(1-pctPaid/100));
+
+  if(L.balance<=0.01){
+    document.getElementById('heroSub').innerHTML = '🎉 <b>Paid in full.</b> Route 9906 is all yours.';
+  } else if(proj.weeks===Infinity){
+    document.getElementById('heroSub').innerHTML = '<b>Payment too low</b> to cover interest — raise the weekly amount in settings.';
+  } else {
+    const payoff = addDays(pays.length?[...pays].sort((a,b)=>b.date.localeCompare(a.date))[0].date:cfg.start, proj.weeks*7);
+    document.getElementById('heroSub').innerHTML =
+      `<b>${proj.weeks}</b> payments left · projected payoff <b>${fmtDate(payoff)}</b>`;
+  }
+
+  // on-track pill
+  const pill=document.getElementById('trackPill'), txt=document.getElementById('trackTxt');
+  const expected = Math.max(0, weeksBetween(cfg.start, todayISO()));
+  pill.className='pill';
+  if(L.balance<=0.01){ pill.classList.add('ok'); txt.textContent='Loan complete'; }
+  else if(L.count>=expected){ pill.classList.add('ok'); txt.textContent=`On track · ${L.count}/${expected} weeks paid`; }
+  else if(expected-L.count<=1){ pill.classList.add('ahead'); txt.textContent=`${L.count}/${expected} weeks — nearly current`; }
+  else { pill.classList.add('behind'); txt.textContent=`${expected-L.count} weeks behind schedule`; }
+
+  // stats
+  const totalInvested = L.paidTot + (cfg.down||0);
+  const lifetimeInterest = L.intTot + (proj.interest===Infinity?0:proj.interest);
+  const stats = [
+    ['Payments made', L.count, L.count===1?'weekly payment':'weekly payments'],
+    ['Total paid to date', fmt(L.paidTot), 'in '+L.count+' payments'],
+    ['Principal paid', fmt(L.prinTot), 'of '+fmt(cfg.loan)],
+    ['Interest paid', fmt(L.intTot), 'so far'],
+    ['Down payment', fmt(cfg.down||0), 'already paid'],
+    ['Total invested', fmt(totalInvested), 'down + payments'],
+    ['Weeks remaining', proj.weeks===Infinity?'—':proj.weeks, proj.weeks===Infinity?'n/a':'~'+(proj.weeks/52).toFixed(1)+' yrs'],
+    ['Projected total interest', proj.interest===Infinity?'—':fmt(lifetimeInterest), 'life of loan'],
+  ];
+  document.getElementById('statGrid').innerHTML = stats.map(s=>`
+    <div class="stat"><div class="k">${s[0]}</div><div class="v ${String(s[1]).length>9?'sm':''}">${s[1]}</div><div class="note">${s[2]}</div></div>
+  `).join('');
+
+  // history
+  const body=document.getElementById('histBody');
+  document.getElementById('histCount').textContent = L.count+(L.count===1?' payment':' payments');
+  if(!L.rows.length){
+    body.innerHTML='<tr><td colspan="6" class="empty">No payments logged yet. Hit “Log this week’s $350” to start your ledger.</td></tr>';
+  } else {
+    body.innerHTML=[...L.rows].reverse().map((r,i)=>`
+      <tr class="row">
+        <td class="txt">${fmtDate(new Date(r.date+'T00:00:00'))}${r.note?`<br><span style="color:var(--ink-faint);font-size:.78rem">${escapeHtml(r.note)}</span>`:''}</td>
+        <td>${fmt2(r.amount)}</td>
+        <td style="color:var(--rust)">${fmt2(r.interest)}</td>
+        <td style="color:var(--sage)">${fmt2(r.principal)}</td>
+        <td><b>${fmt2(r.balance)}</b></td>
+        <td>${ROLE==='editor'?`<button class="del" data-id="${r.id}" title="Delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+        </button>`:''}</td>
+      </tr>`).join('');
+    body.querySelectorAll('.del').forEach(b=>b.onclick=()=>deletePay(+b.dataset.id));
+  }
+
+  drawChart(L);
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------- chart ---------- */
+function drawChart(L){
+  const svg=document.getElementById('chart');
+  const W=720,H=260,padL=8,padR=8,padT=12,padB=22;
+  const full=fullProjection();
+  const maxW=Math.max(full.length-1, 1);
+  const maxBal=cfg.loan||1;
+  const x=w=>padL+(w/maxW)*(W-padL-padR);
+  const y=b=>padT+(1-b/maxBal)*(H-padT-padB);
+
+  // projected path
+  let pPath='M '+x(0)+' '+y(full[0]);
+  for(let w=1;w<full.length;w++) pPath+=' L '+x(w)+' '+y(full[w]);
+
+  // actual path (week index = payment order)
+  let aPath='M '+x(0)+' '+y(cfg.loan);
+  const dots=[];
+  L.rows.forEach((r,i)=>{ const xx=x(i+1), yy=y(r.balance); aPath+=' L '+xx+' '+yy; dots.push([xx,yy]); });
+
+  // y gridlines at 0,25,50,75,100%
+  let grid='';
+  [0,.25,.5,.75,1].forEach(f=>{ const yy=y(cfg.loan*f); grid+=`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="rgba(44,33,23,.08)" stroke-width="1"/><text x="${padL+2}" y="${yy-4}" font-size="9" fill="#9C8B72" font-family="Spline Sans Mono">${fmt(cfg.loan*f)}</text>`; });
+
+  // year ticks
+  let ticks='';
+  for(let yr=0; yr*52<=maxW; yr++){ const xx=x(yr*52); ticks+=`<line x1="${xx}" y1="${H-padB}" x2="${xx}" y2="${H-padB+4}" stroke="#9C8B72"/><text x="${xx}" y="${H-padB+15}" font-size="9" fill="#9C8B72" text-anchor="middle" font-family="Spline Sans Mono">${yr?yr+'y':'now'}</text>`; }
+
+  const dotsSvg=dots.map(d=>`<circle cx="${d[0]}" cy="${d[1]}" r="3.4" fill="#5C7A4F" stroke="#FBF5E9" stroke-width="1.5"/>`).join('');
+  const last=dots.length?dots[dots.length-1]:null;
+  const here=last?`<circle cx="${last[0]}" cy="${last[1]}" r="6" fill="none" stroke="#5C7A4F" stroke-width="1.5" opacity=".5"/>`:'';
+
+  svg.innerHTML = grid+ticks+
+    `<path d="${pPath}" fill="none" stroke="#C8961B" stroke-width="2.4" stroke-linecap="round" opacity=".85"/>`+
+    `<path d="${aPath}" fill="none" stroke="#5C7A4F" stroke-width="2.6" stroke-linecap="round"/>`+
+    dotsSvg+here;
+}
+
+/* ---------- actions ---------- */
+function deletePay(id){
+  if(!confirm('Delete this payment from your ledger?')) return;
+  pays = pays.filter(p=>p.id!==id); persist(); render();
+}
+function openLog(amount){
+  const sec=document.getElementById('logSection'); sec.classList.remove('hide');
+  document.getElementById('payDate').value = suggestNextDate();
+  document.getElementById('payAmt').value = amount;
+  document.getElementById('payNote').value = '';
+  sec.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>document.getElementById('payAmt').focus(),250);
+}
+function suggestNextDate(){
+  if(!pays.length) return cfg.start;
+  const last=[...pays].sort((a,b)=>b.date.localeCompare(a.date))[0].date;
+  return addDays(last,7).toISOString().slice(0,10);
+}
+
+document.getElementById('logWeekBtn').onclick = ()=>openLog(cfg.weekly);
+document.getElementById('customBtn').onclick = ()=>openLog(cfg.weekly);
+document.getElementById('cancelPayBtn').onclick = ()=>document.getElementById('logSection').classList.add('hide');
+document.getElementById('savePayBtn').onclick = ()=>{
+  const date=document.getElementById('payDate').value || todayISO();
+  const amount=parseFloat(document.getElementById('payAmt').value);
+  const note=document.getElementById('payNote').value.trim();
+  if(!amount||amount<=0){ alert('Enter a payment amount.'); return; }
+  pays.push({id:Date.now(), date, amount, note});
+  document.getElementById('logSection').classList.add('hide');
+  persist(); render();
+};
+
+/* settings */
+const settingsSection=document.getElementById('settingsSection');
+document.getElementById('settingsBtn').onclick = ()=>{
+  fillCfgForm(); settingsSection.classList.toggle('hide');
+  if(!settingsSection.classList.contains('hide')) settingsSection.scrollIntoView({behavior:'smooth',block:'center'});
+};
+function fillCfgForm(){
+  document.getElementById('cfgLoan').value=cfg.loan;
+  document.getElementById('cfgRate').value=cfg.rate;
+  document.getElementById('cfgPay').value=cfg.weekly;
+  document.getElementById('cfgDown').value=cfg.down;
+  document.getElementById('cfgStart').value=cfg.start;
+  document.getElementById('assumeNote').innerHTML =
+    `Set up from what you told me: <b>${fmt(cfg.loan)}</b> financed at <b>${cfg.rate}%</b>, <b>${fmt(cfg.down)}</b> down already paid, <b>${fmt(cfg.weekly)}/week</b>. `+
+    `Your deal: <b>$125,000</b> total purchase price, minus the <b>${fmt(cfg.down)}</b> down payment already paid, leaves <b>${fmt(cfg.loan)}</b> financed at <b>${cfg.rate}%</b>, paid <b>${fmt(cfg.weekly)}/week</b> — about 367 weeks (~7 years) to payoff.`;
+}
+document.getElementById('saveCfgBtn').onclick = ()=>{
+  cfg={ loan:+document.getElementById('cfgLoan').value||0, rate:+document.getElementById('cfgRate').value||0,
+        weekly:+document.getElementById('cfgPay').value||0, down:+document.getElementById('cfgDown').value||0,
+        start:document.getElementById('cfgStart').value||todayISO() };
+  settingsSection.classList.add('hide'); persist(); render();
+};
+document.getElementById('exportBtn').onclick = ()=>{
+  const stamp=todayISO();
+  const blob=new Blob([JSON.stringify({app:'route9906-ledger',backedUp:new Date().toISOString(),cfg,pays},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='route9906-ledger-'+stamp+'.json'; a.click();
+};
+
+/* restore from a previously exported backup file */
+document.getElementById('importBtn').onclick = ()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = (e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload = ()=>{
+    let data;
+    try{ data=JSON.parse(reader.result); }
+    catch(err){ alert('That file isn’t a valid backup (couldn’t read it).'); e.target.value=''; return; }
+    if(!data || !Array.isArray(data.pays) || typeof data.cfg!=='object'){
+      alert('That doesn’t look like a Route 9906 backup file.'); e.target.value=''; return;
+    }
+    const incoming = data.pays.length;
+    let mode='replace';
+    if(pays.length){
+      const keep = confirm(
+        `Restore ${incoming} payment(s) from this backup.\n\n`+
+        `Click OK to REPLACE everything currently here.\n`+
+        `Click Cancel to MERGE the backup into your current ${pays.length} payment(s).`
+      );
+      mode = keep ? 'replace' : 'merge';
+    }
+    if(mode==='replace'){
+      cfg = Object.assign({}, DEFAULT_CFG, data.cfg);
+      pays = data.pays.map(normalizePay);
+    } else {
+      const seen = new Set(pays.map(p=>p.id));
+      data.pays.map(normalizePay).forEach(p=>{ if(!seen.has(p.id)) pays.push(p); });
+    }
+    e.target.value=''; settingsSection.classList.add('hide'); persist(); render();
+    alert('Restore complete — '+pays.length+' payment(s) now in your ledger.');
+  };
+  reader.readAsText(file);
+};
+function normalizePay(p){
+  return { id: p.id || Date.now()+Math.floor(Math.random()*1000),
+           date: p.date || todayISO(),
+           amount: Number(p.amount)||0,
+           note: p.note || '' };
+}
+
+document.getElementById('resetBtn').onclick = ()=>{
+  if(!confirm('Erase all payments and reset settings to defaults?')) return;
+  cfg={...DEFAULT_CFG, start:todayISO()}; pays=[]; persist(); render();
+};
+
+/* ============================================================
+   CLOUD SYNC LAYER
+   ============================================================ */
+const CLOUD = !/PASTE|you@gmail|lender@gmail/.test(firebaseConfig.apiKey + EDITOR_EMAIL + VIEWER_EMAILS.join(','))
+              && (firebaseConfig.apiKey||'').length > 12;
+let ROLE='editor';                 // local mode = full control
+let cloudReady=false, ledgerRef=null, applyingRemote=false;
+
+function persist(){
+  if(CLOUD){
+    if(ROLE==='editor' && cloudReady && ledgerRef && !applyingRemote){
+      ledgerRef.set({cfg, pays, updatedAt:Date.now()})
+        .catch(err=>alert('Could not save to the cloud: '+err.message));
+    }
+  } else {
+    saveCfg(cfg); savePays(pays);
+  }
+}
+
+function applyRoleUI(){
+  const editor = ROLE==='editor';
+  ['logWeekBtn','customBtn','settingsBtn'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display = editor ? '' : 'none';
+  });
+  document.getElementById('viewerBadge').classList.toggle('hide', editor);
+}
+
+function startLocal(){
+  ROLE='editor';
+  document.getElementById('cloudBanner').classList.remove('hide');
+  render();
+}
+
+function startCloud(){
+  document.getElementById('footNote').textContent='Synced to your private cloud ledger — the owner edits, invited viewers can follow along.';
+  let auth;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    ledgerRef = firebase.firestore().collection('ledgers').doc(LEDGER_ID);
+  }catch(err){
+    document.getElementById('authGate').classList.remove('hide');
+    document.getElementById('authMsg').textContent='Setup problem: '+err.message;
+    return;
+  }
+  const gate=document.getElementById('authGate'), chip=document.getElementById('authChip'), msg=document.getElementById('authMsg');
+  gate.classList.remove('hide');
+
+  document.getElementById('signInBtn').onclick=()=>{
+    msg.textContent='';
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+      .catch(err=>{ msg.textContent='Sign-in failed: '+err.message; });
+  };
+  document.getElementById('signOutBtn').onclick=()=>auth.signOut();
+
+  const ED=EDITOR_EMAIL.toLowerCase();
+  const VIEW=VIEWER_EMAILS.map(e=>e.toLowerCase());
+
+  auth.onAuthStateChanged(user=>{
+    if(!user){
+      cloudReady=false; chip.classList.add('hide'); gate.classList.remove('hide'); return;
+    }
+    const email=(user.email||'').toLowerCase();
+    ROLE = email===ED ? 'editor' : VIEW.includes(email) ? 'viewer' : 'denied';
+    if(ROLE==='denied'){
+      msg.textContent = email+' isn’t on the access list for this ledger.';
+      auth.signOut(); return;
+    }
+    gate.classList.add('hide');
+    chip.classList.remove('hide');
+    document.getElementById('chipEmail').textContent=email;
+    const roleEl=document.getElementById('chipRole');
+    roleEl.textContent = ROLE==='editor' ? 'Editor' : 'View only';
+    roleEl.classList.toggle('viewer', ROLE!=='editor');
+    applyRoleUI();
+
+    ledgerRef.onSnapshot(snap=>{
+      if(snap.exists){
+        const d=snap.data()||{};
+        applyingRemote=true;
+        cfg=Object.assign({}, DEFAULT_CFG, d.cfg||{});
+        pays=Array.isArray(d.pays)?d.pays.map(normalizePay):[];
+        applyingRemote=false;
+      } else if(ROLE==='editor'){
+        ledgerRef.set({cfg:{...DEFAULT_CFG, start:todayISO()}, pays:[], updatedAt:Date.now()});
+        return; // snapshot will fire again with the new doc
+      }
+      cloudReady=true;
+      render();
+    }, err=>{ msg.textContent='Could not load ledger: '+err.message; });
+  });
+}
+
+if(CLOUD) startCloud(); else startLocal();
+</script>
+</body>
+</html>
